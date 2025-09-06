@@ -1,0 +1,8 @@
+name: lms-project
+on: workflow_dispatch   # push --> Automatic trigger
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps: 
+      - name: Greet msg
+        run: echo "Hello World"
