@@ -14,5 +14,12 @@ jobs:
           payload: |
             channel: project-aug
             text: "LMS Prod deployment started approve it"
-
+  database:
+    runs-on: self-hosted
+    steps:
+      - name: create docker network
+        run: docker network create lmsnetwork
+      - name: create db-container
+        run: docker container run -dt --name lmsdb -p 5432:5432 --network lmsnetwork -e POSTGRES_PASSWORD=admin123 postgres
+    
         
