@@ -15,6 +15,7 @@ jobs:
             channel: project-aug
             text: "LMS Prod deployment started approve it"
   database:
+    needs: Notification-Approval
     runs-on: self-hosted
     steps:
       - name: create docker network
