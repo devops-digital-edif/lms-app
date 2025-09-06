@@ -1,8 +1,18 @@
 name: lms-project
 on: workflow_dispatch   # push --> Automatic trigger
 jobs:
-  test:
+  Notification-Approval:
     runs-on: ubuntu-latest
-    steps: 
-      - name: Greet msg
-        run: echo "Hello World"
+    environment:
+      name: prod
+    steps:
+      - name: send slack notification
+        uses: slackapi/slack-github-action@v2.1.1
+        with:
+          webhook: ${{ secrets.SLACK_WEBHOOK_URL }}
+          webhook-type: incoming-webhook
+          payload: |
+            channel: project-aug
+            text: "LMS Prod deployment started approve it"
+
+        
