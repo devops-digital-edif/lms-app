@@ -52,9 +52,9 @@ jobs:
           username: ${{ vars.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
       - name: push backend image
-        run: docker push ${{ vars.DOCKER_USERNAME }}/api:latest .
+        run: docker push ${{ vars.DOCKER_USERNAME }}/api:latest 
       - name: push frontend image
-        run: docker push ${{ vars.DOCKER_USERNAME }}/webapp:latest .
+        run: docker push ${{ vars.DOCKER_USERNAME }}/webapp:latest 
   backend:
     needs: 
       - database
@@ -62,7 +62,7 @@ jobs:
     runs-on: self-hosted
     steps:
       - name: pull image
-        run: docker pull ${{ vars.DOCKER_USERNAME }}/api:latest .
+        run: docker pull ${{ vars.DOCKER_USERNAME }}/api:latest 
       - name: run the container
         run: |
           if docker ps -a --format '{{ .Names }}' | grep -wq backend; then
@@ -80,7 +80,7 @@ jobs:
     runs-on: self-hosted
     steps:
       - name: pull image
-        run: docker pull ${{ vars.DOCKER_USERNAME }}/webapp:latest .
+        run: docker pull ${{ vars.DOCKER_USERNAME }}/webapp:latest 
       - name: run the container
         run: |
           if docker ps -a --format '{{ .Names }}' | grep -wq web; then
