@@ -38,3 +38,68 @@ jobs:
           else
             docker container run -dt --name lmsdb -p 5432:5432 --network lmsnetwork -e POSTGRES_PASSWORD=${{ secrets.DB_PASSWORD}} postgres
           fi
+  build:
+    needs:
+      - approval
+      - database
+    runs-on: ubuntu-latest
+    steps:
+      - name: Clone Code
+        uses: actions/checkout@v5.0.0
+      - name: build backend
+        run: |
+          cd api
+          docker build -t ${{vars.DOCKER_USERNAME}}/api:latest .
+      - name: build frontend
+        run: |
+          cd webapp
+          docker build -t ${{vars.DOCKER_USERNAME}}/webapp:latest .
+      - name: Docker hub Login
+        uses: docker/login-action@v3.5.0
+        with:
+          username: ${{vars.DOCKER_USERNAME}}
+          password: ${{secrets.DOCKER_PASSWORD}}
+      - name: Push Images
+        run: |
+          docker push ${{vars.DOCKER_USERNAME}}/api:latest
+          docker push ${{vars.DOCKER_USERNAME}}/webapp:latest
+  backend:
+    needs:
+      - database
+      - build
+    runs-on: self-hosted
+    steps:
+      - name: Run Backend
+        run: |
+          docker pull ${{vars.DOCKER_USERNAME}}/api:latest
+          docker container run -dt --name backend -p 3000:3000 --network lmsnetwork -e MODE=PROD -e PORT=3000 -e DATABASE_URL=postgresql://postgres:${{ secrets.DB_PASSWORD}}@lmsdb:5432/postgres ${{vars.DOCKER_USERNAME}}/api:latest
+
+  frontend:
+    needs:
+      - build
+      - backend
+    runs-on: self-hosted
+    steps:
+      - name: Run Backend
+        run: |
+          docker pull ${{vars.DOCKER_USERNAME}}/webapp:latest
+          docker container run -dt --name frontend --network lmsnetwork -p 80:80 ${{vars.DOCKER_USERNAME}}/webapp:latest
+
+  feedback:
+    runs-on: ubuntu-latest
+    steps:
+      - name: send notification to slack
+        uses: slackapi/slack-github-action@v2.1.1
+        with:
+          webhook: ${{secrets.SLACK_WEBHOOK_URL}}
+          webhook-type: incoming-webhook
+          payload: |
+            channel: project-aug
+            text: "LMS Application Prod Deployment DONE, Access it on: http://13.56.181.229 "
+
+
+
+
+
+
+      
