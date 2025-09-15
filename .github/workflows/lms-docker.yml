@@ -1,0 +1,30 @@
+name: LMS Docker Deployment
+on: workflow_dispatch
+jobs:
+  notification:
+    runs-on: ubuntu-latest
+    steps:
+      - name: send notification to slack
+        uses: slackapi/slack-github-action@v2.1.1
+        with:
+          webhook: ${{secrets.SLACK_WEBHOOK_URL}}
+          webhook-type: incoming-webhook
+          payload: |
+            channel: project-aug
+            text: "LMS Application Prod Deployment Started, Go and Approve it"
+  approval:
+    needs: notification
+    runs-on: ubuntu-latest
+    environment:
+      name: prod
+    steps:
+      - name: Approval Required
+        run: echo "Approval Required by Murali"
+  database:
+    needs: approval
+    runs-on: self-hosted
+    steps:
+      - name: Create Network
+        run: docker network create lmsnetwork
+      - name: Run Database
+        run: docker container run -dt --name lmsdb --network lmsnetwork -p 5432:5432 -e POSTGRES_PASSWORD=${{secrets.DB_PASSWORD}} postgres
