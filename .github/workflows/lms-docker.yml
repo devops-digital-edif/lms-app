@@ -86,6 +86,7 @@ jobs:
           docker container run -dt --name frontend --network lmsnetwork -p 80:80 ${{vars.DOCKER_USERNAME}}/webapp:latest
 
   feedback:
+    needs: frontend
     runs-on: ubuntu-latest
     steps:
       - name: send notification to slack
