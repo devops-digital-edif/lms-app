@@ -25,6 +25,16 @@ jobs:
     runs-on: self-hosted
     steps:
       - name: Create Network
-        run: docker network create lmsnetwork
+        run: |
+          if docker network ls --format '{{ .Name }}' | grep -wq lmsnetwork; then
+            echo "lmsnetwork exist"
+          else
+            docker network create lmsnetwork
+          fi
       - name: Run Database
-        run: docker container run -dt --name lmsdb --network lmsnetwork -p 5432:5432 -e POSTGRES_PASSWORD=${{secrets.DB_PASSWORD}} postgres
+        run: |
+          if docker ps -a --format '{{ .Names }}' | grep -wq lmsdb; then
+            echo "lmsdb container exists"
+          else
+            docker container run -dt --name lmsdb -p 5432:5432 --network lmsnetwork -e POSTGRES_PASSWORD=${{ secrets.DB_PASSWORD}} postgres
+          fi
